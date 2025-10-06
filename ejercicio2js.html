@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Validación</title>
+    <link rel="stylesheet" href="ejercicio2js.css">
+</head>
+<body>
+    <div class="contenedor">
+       
+        <header class="encabezado">
+            <h1>Formulario de Registro</h1>
+            <p>Ingresa tus datos personales</p>
+        </header>
+
+        
+        <div class="contenido-principal">
+            
+            <section class="formulario-seccion">
+                <form id="miFormulario" class="formulario">
+                    <div class="campo">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre">
+                    </div>
+
+                    <div class="campo">
+                        <label for="apellidos">Apellidos:</label>
+                        <input type="text" id="apellidos" name="apellidos" placeholder="Ingresa tus apellidos">
+                    </div>
+
+                    <div class="campo">
+                        <label for="edad">Edad:</label>
+                        <input type="number" id="edad" name="edad" placeholder="Ingresa tu edad" min="1">
+                    </div>
+
+                    <button type="submit" class="btn-enviar">Enviar Datos</button>
+                </form>
+            </section>
+
+            
+            <section class="datos-seccion">
+                <div id="cajaDatos" class="caja-datos oculto">
+                    <button id="btnCerrar" class="btn-cerrar">× Cerrar</button>
+                    <h3>Datos Ingresados:</h3>
+                    <div class="info-datos">
+                        <p><strong>Nombre:</strong> <span id="infoNombre"></span></p>
+                        <p><strong>Apellidos:</strong> <span id="infoApellidos"></span></p>
+                        <p><strong>Edad:</strong> <span id="infoEdad"></span> años</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del DOM
+    const formulario = document.getElementById('miFormulario');
+    const cajaDatos = document.getElementById('cajaDatos');
+    const btnCerrar = document.getElementById('btnCerrar');
+    const inputNombre = document.getElementById('nombre');
+    const inputApellidos = document.getElementById('apellidos');
+    const inputEdad = document.getElementById('edad');
+    
+    //  para mostrar la información
+    const infoNombre = document.getElementById('infoNombre');
+    const infoApellidos = document.getElementById('infoApellidos');
+    const infoEdad = document.getElementById('infoEdad');
+
+    // Función para mostrar errores 
+    function mostrarError(campo, mensaje) {
+        // Remover error anterior si existe
+        let errorElement = campo.nextElementSibling;
+        if (!errorElement || !errorElement.classList.contains('error')) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'error';
+            campo.parentNode.appendChild(errorElement);
+        }
+        
+        errorElement.textContent = mensaje;
+        errorElement.style.display = 'block';
+        campo.style.borderColor = '#dc3545';
+    }
+
+    // Función para limpiar errores 
+    function limpiarErrores() {
+        const errores = document.querySelectorAll('.error');
+        errores.forEach(error => {
+            error.style.display = 'none';
+        });
+        
+        // Restaurar bordes normales
+        const inputs = [inputNombre, inputApellidos, inputEdad];
+        inputs.forEach(input => {
+            if (input) input.style.borderColor = '#007EA7';
+        });
+    }
+
+    // Función para validar los csmpos
+    function validarFormulario() {
+        let esValido = true;
+        limpiarErrores();
+
+        // Validar nombre 
+        const nombreValor = inputNombre.value.trim();
+        if (nombreValor === '') {
+            mostrarError(inputNombre, '❌ El nombre es obligatorio');
+            esValido = false;
+        } else if (nombreValor.length < 2) {
+            mostrarError(inputNombre, '❌ El nombre debe tener al menos 2 caracteres');
+            esValido = false;
+        }
+
+        // Validar apellidos 
+        const apellidosValor = inputApellidos.value.trim();
+        if (apellidosValor === '') {
+            mostrarError(inputApellidos, '❌ Los apellidos son obligatorios');
+            esValido = false;
+        } else if (apellidosValor.length < 2) {
+            mostrarError(inputApellidos, '❌ Los apellidos deben tener al menos 2 caracteres');
+            esValido = false;
+        }
+
+        // Validar edad 
+        const edadValor = inputEdad.value.trim();
+        if (edadValor === '') {
+            mostrarError(inputEdad, '❌ La edad es obligatoria');
+            esValido = false;
+        } else {
+            const edadNumero = parseInt(edadValor);
+            if (isNaN(edadNumero) || edadNumero <= 0) {
+                mostrarError(inputEdad, '❌ La edad debe ser un número positivo mayor a 0');
+                esValido = false;
+            } else if (edadNumero > 120) {
+                mostrarError(inputEdad, '❌ Ingresa una edad válida (1-120)');
+                esValido = false;
+            }
+        }
+
+        return esValido;
+    }
+
+    // Función para mostrar los datos en la caja
+    function mostrarDatos() {
+        infoNombre.textContent = inputNombre.value.trim();
+        infoApellidos.textContent = inputApellidos.value.trim();
+        infoEdad.textContent = inputEdad.value;
+        
+        cajaDatos.classList.remove('oculto');
+    }
+
+    // Función para limpiar el formulario
+    function limpiarFormulario() {
+        formulario.reset();
+        limpiarErrores();
+    }
+
+    // Función para cerrar la caja de datos
+    function cerrarCajaDatos() {
+        cajaDatos.classList.add('oculto');
+        limpiarFormulario();
+        inputNombre.focus();
+    }
+
+    // Event listener para el envío del formulario - CORREGIDO
+    formulario.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        console.log('Validando formulario...'); // Para debug
+        
+        // Validar datos
+        if (validarFormulario()) {
+            console.log('Formulario válido, mostrando datos...');
+            mostrarDatos();
+        } else {
+            console.log('Formulario inválido, mostrando errores...');
+            // Aquí los errores ya se muestran automáticamente
+        }
+    });
+
+    // Event listener para el botón cerrar
+    btnCerrar.addEventListener('click', cerrarCajaDatos);
+
+    // Event listeners para limpiar errores al escribir - MEJORADO
+    const inputs = [inputNombre, inputApellidos, inputEdad];
+    inputs.forEach(input => {
+        if (input) {
+            input.addEventListener('input', function() {
+                // Solo limpiar el error de este campo específico
+                const errorElement = this.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('error')) {
+                    errorElement.style.display = 'none';
+                    this.style.borderColor = '#007EA7';
+                }
+            });
+        }
+    });
+});
+    </script>
+</body>
+</html>
